@@ -8,7 +8,16 @@ export class ReactMovie extends Component {
   state = {
     errorMessage: "Check Again, You Have An Error",
     isLoading: false,
-    initialState: "superman",
+    initialState: [
+      "Superman",
+      "Lord of The Rings",
+      "Batman",
+      "Pokemon",
+      "Harry Potter",
+      "Star Wars",
+      "Avengers",
+      "Terminator",
+    ],
     movieResultsArray: [],
     isError: false,
     search: "",
@@ -30,14 +39,19 @@ export class ReactMovie extends Component {
     try {
       // result will be an array of movies based on the search parameters
       let result = await axios.get(
-        `http://omdbapi.com/?s=${search}&apikey=${process.env.REACT_APP_MOVIE_API_KEY}`
+        `http://omdbapi.com/?s=${search}&apikey=${process.env.REACT_APP_MOVIE_API_KEY}`,
+        {
+          params: {
+            _Limit: 8,
+          },
+        }
       );
       console.log(result);
-      console.log(result.status);
-      console.log(result.data.Response);
-
       console.log(result.data);
       console.log(result.data.Error);
+      console.log(result.data.Response);
+      console.log(result.status);
+
       if (result.data.Response === "False") {
         console.log(result.data.Response);
         console.log(result.data.Error);
@@ -48,6 +62,8 @@ export class ReactMovie extends Component {
         });
       } else {
         //(result.data.response === "True")
+
+        // let theGrateful8 =
         this.setState({
           movieResultsArray: result.data.Search,
           isLoading: false,
@@ -87,11 +103,15 @@ export class ReactMovie extends Component {
   //   http://www.omdbapi.com/?apikey=[REACT_APP_MOVIE_API_KEY] <--Data API
   //   http://img.omdbapi.com/?apikey=[REACT_APP_MOVIE_API_KEY]  <-- Poster API
   handleOnClick = () => {
+    console.log(this.state);
+    // console.log(input.value);
     this.fetchMovieApi(this.state.search);
   };
 
   handleMovieInputChange = (e) => {
+    console.log(e.target.name);
     this.setState({
+      isError: false,
       [e.target.name]: e.target.value,
     });
     // console.log("Line XXX - e.target.value -", e.target.value);
@@ -111,23 +131,25 @@ export class ReactMovie extends Component {
         }}
       >
         {this.state.movieResultsArray.map((movie, index) => {
-          return (
-            <div id="movie-box" style={{ width: "20%", margin: "5px" }}>
-              <div>
-                {" "}
-                {index + 1} {movie.Title}
-              </div>
+          if (index < 8) {
+            return (
+              <div id="movie-box" style={{ width: "20%", margin: "5%" }}>
+                <div>
+                  {" "}
+                  {index + 1} {movie.Title}
+                </div>
 
-              <a href={`https://www.imdb.com/title/${movie.imdbID}`}>
-                <div>IMDB: {movie.imdbID}</div>
-                <img
-                  src={movie.Poster}
-                  alt={movie.Title}
-                  style={{ width: "100%" }}
-                />
-              </a>
-            </div>
-          );
+                <a href={`https://www.imdb.com/title/${movie.imdbID}`}>
+                  <div>IMDB: {movie.imdbID}</div>
+                  <img
+                    src={movie.Poster}
+                    alt={movie.Title}
+                    style={{ width: "100%" }}
+                  />
+                </a>
+              </div>
+            );
+          }
         })}
       </div>
     );
@@ -149,6 +171,7 @@ export class ReactMovie extends Component {
     return (
       <div>
         <input
+          name="search"
           placeholder="Enter your movie"
           onChange={this.handleMovieInputChange}
           onKeyPress={this.handleEnterPress}
