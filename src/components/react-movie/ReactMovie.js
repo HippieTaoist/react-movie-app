@@ -1,104 +1,172 @@
 import React, { Component } from "react";
 import axios from "axios";
+import Loading from "../common/Loading";
 
-require("dotenv");
+require("dotenv").config();
 
 export class ReactMovie extends Component {
   state = {
-    isLoading: true,
+    errorMessage: "Check Again, You Have An Error",
+    isLoading: false,
     initialState: "superman",
     movieResultsArray: [],
+    isError: false,
+    search: "",
   };
 
+  // Runs once when component is mounted to the page.
   componentDidMount = async () => {
-    console.log(
-      "Line XXX - this.state.initialState -",
-      await this.fetchMovieApi(this.state.initialState)
-    );
-
-    console.log(
-      "Line XXX - this.fetchMovieApi(this.state.initialState) -",
-      this.fetchMovieApi(this.state.initialState)
-    );
-
-    let result = await this.fetchMovieApi(this.state.initialState);
-
-    console.log("result", result);
-    return <h1>${result}</h1>;
+    // setup page with initial movie results => make random on each fresh load
+    this.fetchMovieApi(this.state.initialState);
   };
 
+  // searches the movie api for results.
   fetchMovieApi = async (search) => {
+    // initial loading div to improve user experience
     this.setState({
       isLoading: true,
     });
 
     try {
+      // result will be an array of movies based on the search parameters
       let result = await axios.get(
-        `http://www.omdbapi.com/?s=${search}&apikey=${process.env.REACT_APP_MOVIE_API_KEY}`
+        `http://omdbapi.com/?s=${search}&apikey=${process.env.REACT_APP_MOVIE_API_KEY}`
       );
+      console.log(result);
+      console.log(result.status);
+      console.log(result.data.Response);
 
-      // console.log("Line XXX - result -", result);
-      // console.log("Line XXX - result.data -", result.data);
-      // console.log("Line XXX - result.data.Search -", result.data.Search);
-      // console.log(
-      //   "Line XXX - result.data.Search[0].imdbID -",
-      //   result.data.Search[0].imdbID
-      // );
+      console.log(result.data);
+      console.log(result.data.Error);
+      if (result.data.Response === "False") {
+        console.log(result.data.Response);
+        console.log(result.data.Error);
 
-      this.setState({
-        movieResultsArray: result.data.Search,
-      });
-
-      return result;
-    } catch (e) {
-      console.log(e.response);
-
-      //catch 404 and set state. don't for get to keep isl oading to false
-      if (e && e.response.status === 404) {
         this.setState({
           isError: true,
-          errorMessage: e.response.data,
+          errorMessage: result.data.Error,
+        });
+      } else {
+        //(result.data.response === "True")
+        this.setState({
+          movieResultsArray: result.data.Search,
           isLoading: false,
         });
       }
+      // Array of movies filtered down to usable content
+      // can deconstruct {Title},{Poster},and {imdbID} for population data
+    } catch (e) {
+      console.log(e);
+
+      //catch 404 and set state. don't forget to keep is loading to false
+      if (e && e.response.status === 404) {
+        this.setState({
+          isError: true,
+          errorMessage: e.response.message,
+          isLoading: false,
+        });
+      }
+
+      // if (e && e.response.status === 200) {
+      //   this.setState({
+      //     isError: true,
+      //     errorMessage: e.response.data,
+      //     isLoading: false,
+      //   });
+      // }
+
+      // if (e == undefined) {
+      //   this.setState({
+      //     isError: true,
+      //     errorMessage: `We have a problem, seems that ${e.errorMessage}`,
+      //   });
+      // }
     }
   };
 
   //   http://www.omdbapi.com/?apikey=[REACT_APP_MOVIE_API_KEY] <--Data API
   //   http://img.omdbapi.com/?apikey=[REACT_APP_MOVIE_API_KEY]  <-- Poster API
-  handleMovieSearch = () => {
-    return <div>yada</div>;
+  handleOnClick = () => {
+    this.fetchMovieApi(this.state.search);
   };
 
-  handleMovieInputChange = () => {
-    return <div>yada</div>;
+  handleMovieInputChange = (e) => {
+    this.setState({
+      [e.target.name]: e.target.value,
+    });
+    // console.log("Line XXX - e.target.value -", e.target.value);
   };
 
   handleMovieLoad = () => {
     //   App should load 8 random movies from the start (Should be random from these 8 movie franchises Superman, lord of the ring, batman, Pokemon, Harry Potter, Star Wars, Avengers, Terminator)
-    console.log("Line XXX - movie -", this.state.movieResultsArray);
+
     return (
-      <div>
-        {this.state.movieResultsArray.map(({ Poster, Title, imdbID }) => (
-          <img src={Poster} alt={Title} style={{ width: "250px" }} />
-        ))}
+      <div
+        style={{
+          backgroundColor: "grey",
+          display: "flex",
+          flexDirection: "row",
+          flexWrap: "wrap",
+          justifyContent: "center",
+        }}
+      >
+        {this.state.movieResultsArray.map((movie, index) => {
+          return (
+            <div id="movie-box" style={{ width: "20%", margin: "5px" }}>
+              <div>
+                {" "}
+                {index + 1} {movie.Title}
+              </div>
+
+              <a href={`https://www.imdb.com/title/${movie.imdbID}`}>
+                <div>IMDB: {movie.imdbID}</div>
+                <img
+                  src={movie.Poster}
+                  alt={movie.Title}
+                  style={{ width: "100%" }}
+                />
+              </a>
+            </div>
+          );
+        })}
       </div>
     );
   };
 
-  render() {
-    console.log(this.state.movieResultsArray[0]);
+  handleTheError = () => {
+    console.log(this.state.errorMessage);
+    return <h1>{this.state.errorMessage}</h1>;
+  };
 
+  handleEnterPress = (e) => {
+    console.log(e);
+    if (e.which === 13) {
+      this.handleOnClick();
+    }
+  };
+
+  render() {
     return (
       <div>
         <input
           placeholder="Enter your movie"
-          onChange={this.handleMovieInputChange()}
+          onChange={this.handleMovieInputChange}
+          onKeyPress={this.handleEnterPress}
         />
-        <button onClick={this.handleMovieSearch()}>Search</button>
-        <h1>HIYasdfafsdf</h1>
+        <button onClick={this.handleOnClick}>Search</button>
+        <div>
+          {this.state.isError ? (
+            this.handleTheError()
+          ) : (
+            <div>"isError - False"</div>
+          )}
+        </div>
         <hr />
-        <div>{this.handleMovieLoad()}</div>
+        {this.state.isLoading ? (
+          <Loading />
+        ) : (
+          <div>{this.handleMovieLoad()}</div>
+        )}
       </div>
     );
   }
