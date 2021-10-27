@@ -25,8 +25,12 @@ export class ReactMovie extends Component {
 
   // Runs once when component is mounted to the page.
   componentDidMount = async () => {
+    const randomElement =
+      this.state.initialState[
+        Math.floor(Math.random() * this.state.initialState.length)
+      ];
     // setup page with initial movie results => make random on each fresh load
-    this.fetchMovieApi(this.state.initialState);
+    this.fetchMovieApi(randomElement);
   };
 
   // searches the movie api for results.
