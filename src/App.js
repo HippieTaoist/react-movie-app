@@ -1,5 +1,7 @@
 import "./App.css";
-import ReactMovie from "./components/ReactMovie";
+import ReactMovie from "./components/react-movie/ReactMovie";
+
+require("dotenv").config();
 
 function App() {
   return (
