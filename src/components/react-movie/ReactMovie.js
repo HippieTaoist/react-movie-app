@@ -7,6 +7,7 @@ export class ReactMovie extends Component {
   state = {
     isLoading: true,
     initialState: "superman",
+    movieResultsArray: [],
   };
 
   componentDidMount = async () => {
@@ -36,9 +37,31 @@ export class ReactMovie extends Component {
         `http://www.omdbapi.com/?s=${search}&apikey=${process.env.REACT_APP_MOVIE_API_KEY}`
       );
 
-      console.log("Line XXX - result -", result);
+      // console.log("Line XXX - result -", result);
+      // console.log("Line XXX - result.data -", result.data);
+      // console.log("Line XXX - result.data.Search -", result.data.Search);
+      // console.log(
+      //   "Line XXX - result.data.Search[0].imdbID -",
+      //   result.data.Search[0].imdbID
+      // );
+
+      this.setState({
+        movieResultsArray: result.data.Search,
+      });
+
       return result;
-    } catch (err) {}
+    } catch (e) {
+      console.log(e.response);
+
+      //catch 404 and set state. don't for get to keep isl oading to false
+      if (e && e.response.status === 404) {
+        this.setState({
+          isError: true,
+          errorMessage: e.response.data,
+          isLoading: false,
+        });
+      }
+    }
   };
 
   //   http://www.omdbapi.com/?apikey=[REACT_APP_MOVIE_API_KEY] <--Data API
@@ -53,10 +76,19 @@ export class ReactMovie extends Component {
 
   handleMovieLoad = () => {
     //   App should load 8 random movies from the start (Should be random from these 8 movie franchises Superman, lord of the ring, batman, Pokemon, Harry Potter, Star Wars, Avengers, Terminator)
-    return <div>this is movie load</div>;
+    console.log("Line XXX - movie -", this.state.movieResultsArray);
+    return (
+      <div>
+        {this.state.movieResultsArray.map(({ Poster, Title, imdbID }) => (
+          <img src={Poster} alt={Title} style={{ width: "250px" }} />
+        ))}
+      </div>
+    );
   };
 
   render() {
+    console.log(this.state.movieResultsArray[0]);
+
     return (
       <div>
         <input
