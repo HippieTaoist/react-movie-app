@@ -1,4 +1,6 @@
-import React, { Component } from "react";
+import React, {
+  Component
+} from "react";
 import axios from "axios";
 import Loading from "../common/Loading";
 import MovieLoad from "../movieload/MovieLoad";
@@ -20,14 +22,12 @@ export class ReactMovie extends Component {
       "Avengers",
       "Terminator",
     ],
-    movieResultsArray: [
-      {
-        imdbID: "",
-        imdbRating: "",
-        Title: "",
-        Poster: "",
-      },
-    ],
+    movieResultsArray: [{
+      imdbID: "",
+      imdbRating: "",
+      Title: "",
+      Poster: "",
+    }, ],
     isError: false,
     search: "",
   };
@@ -42,27 +42,56 @@ export class ReactMovie extends Component {
     this.fetchMovieApi(randomElement);
   };
 
+  ///////////////////////////CORRECT WAY//////////////
+  // componentDidMount = async () => {
+  //   try {
+  //     let payload = await axios.get(
+  //       `http://omdbapi.com/?apikey=6332b1e1&s=superman`
+  //     );
+
+  //     console.log(payload.data.Search);
+
+  //     let movieIdArray = payload.data.Search.map((item) => item.imdbID);
+
+  //     let promiseMovieArray = movieIdArray.map(async (item) => {
+  //       return await axios.get(`http://omdbapi.com/?apikey=6332b1e1&i=${item}`);
+  //     });
+  //     //[<Promise>, <Promise>]
+  //     console.log(promiseMovieArray);
+
+  //     Promise.all(promiseMovieArray)
+  //       .then((result) => {
+  //         console.log(result);
+  //       })
+  //       .catch((e) => {
+  //         console.log(e);
+  //       });
+  //   } catch (e) {
+  //     console.log(e);
+  //   }
+  // };
+  /////////////////////////CORRECT WAY//////////////////////
   fetchMovieAddRating = async (movie, index) => {
     let tempVar = await axios.get(
       `http://www.omdbapi.com/?i=${movie.imdbID}&apikey=${process.env.REACT_APP_MOVIE_API_KEY}`
     );
     let tempVarRating = Object.assign({}, movie);
-    console.log(movie);
+    // console.log(movie);
 
     tempVarRating.imdbRating = tempVar.data.imdbRating;
-    console.log(tempVarRating);
+    // console.log(tempVarRating);
     movie = tempVarRating;
-    console.log(movie);
+    console.log(...this.state.movieResultsArray);
 
+    console.log(this.state.movieResultsArray);
+
+    console.log([this.state.movieResultsArray]);
     let movies = [...this.state.movieResultsArray];
-    console.log("Movie", movie);
-    let movie2Rate = { ...movies[index] };
-    console.log("movie2Rate", movie2Rate);
-    movie2Rate = movie;
-    console.log("movie2Rate", movie2Rate);
 
     movies[index] = movie;
-    this.setState({ movieResultsArray: movies });
+    this.setState({
+      movieResultsArray: movies
+    });
     // this.setState({ movieResultsArray,[index]: movie });
     // console.log(this.movieResultsArray);
     // this.setState({movieResultsArray:})
@@ -79,8 +108,7 @@ export class ReactMovie extends Component {
     try {
       // result will be an array of movies based on the search parameters
       let result = await axios.get(
-        `http://omdbapi.com/?s=${search}&apikey=${process.env.REACT_APP_MOVIE_API_KEY}`,
-        {
+        `http://omdbapi.com/?s=${search}&apikey=${process.env.REACT_APP_MOVIE_API_KEY}`, {
           params: {
             _Limit: 8,
           },
@@ -90,18 +118,19 @@ export class ReactMovie extends Component {
       // let resultTransfer = [];
 
       let resultSearchWithRating = result.data.Search.map((movie, index) => {
-        this.fetchMovieAddRating(movie, index).then(
-          console.log(result.data.Search[index])
-        );
+        this.fetchMovieAddRating(movie, index)
+          .then
+        // console.log(result.data.Search[index])
+        ();
         return;
       });
 
-      console.log(resultSearchWithRating);
+      // console.log(resultSearchWithRating);
       // console.log(result.data);
       // console.log(result.status);
 
       if (result.data.Response === "False") {
-        console.log(result.data.Response);
+        // console.log(result.data.Response);
         console.log(result.data.Error);
 
         this.setState({
@@ -133,8 +162,8 @@ export class ReactMovie extends Component {
   //   http://www.omdbapi.com/?apikey=[REACT_APP_MOVIE_API_KEY] <--Data API
   //   http://img.omdbapi.com/?apikey=[REACT_APP_MOVIE_API_KEY]  <-- Poster API
   handleOnClick = () => {
-    console.log(this.state);
-    // console.log(input.value);
+    // console.log(this.state);
+    // // console.log(input.value);
     this.fetchMovieApi(this.state.search);
   };
 
@@ -149,7 +178,9 @@ export class ReactMovie extends Component {
 
   handleTheError = () => {
     console.log(this.state.errorMessage);
-    return <h1>{this.state.errorMessage}</h1>;
+    return <h1 > {
+      this.state.errorMessage
+    } < /h1>;
   };
 
   handleEnterPress = (e) => {
@@ -160,32 +191,44 @@ export class ReactMovie extends Component {
   };
 
   render() {
-    return (
-      <>
-        {/* {" "} */}
-        <div>
-          <input
-            name="search"
-            placeholder="Enter your movie"
-            // onChange={this.handleMovieInputChange}
-            onKeyPress={this.handleEnterPress}
+    return ( <
+      > {
+        /* {" "} */ } <
+      div >
+      <
+      input name = "search"
+      placeholder = "Enter your movie"
+      // onChange={this.handleMovieInputChange}
+      onKeyPress = {
+        this.handleEnterPress
+      }
+      /> <
+      button onClick = {
+        this.handleOnClick
+      } > Search < /button> <
+      div > {
+        this.state.isError ? ( <
+          TheError errorMessage = {
+            this.state.errorMessage
+          }
+          /> / / this.handleTheError()
+        ) : ( <
+          div > What m Are You Looking For ? < /div>
+        )
+      } <
+      /div> <
+      hr / > {
+        this.state.isLoading ? ( <
+          Loading / >
+        ) : ( <
+          MovieLoad movieResultsArray = {
+            this.state.movieResultsArray
+          }
           />
-          <button onClick={this.handleOnClick}>Search</button>
-          <div>
-            {this.state.isError ? (
-              <TheError errorMessage={this.state.errorMessage} /> //this.handleTheError()
-            ) : (
-              <div>What m Are You Looking For?</div>
-            )}
-          </div>
-          <hr />
-          {this.state.isLoading ? (
-            <Loading />
-          ) : (
-            <MovieLoad movieResultsArray={this.state.movieResultsArray} />
-          )}
-        </div>
-      </>
+        )
+      } <
+      /div> <
+      />
     );
   }
 }
