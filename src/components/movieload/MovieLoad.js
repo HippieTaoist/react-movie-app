@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 
 function MovieLoad(props) {
@@ -16,40 +17,37 @@ function MovieLoad(props) {
       }}
     >
       {props.movieResultsArray.map((movie, index) => {
-        console.log("Line XXX - movie -", movie);
-
-        console.log("Line XXX - movie -", movie?.imdbRating);
-
-        console.log("Line XXX - movie -", movie.Title);
-        console.log("Line XXX - movie -", movie.imdbID);
-        console.log("Line XXX - movie -", movie.Type);
         if (index < 8) {
           return (
             <div
               key={index + 1}
               id="movie-box"
-              style={{ width: "20%", margin: "5%" }}
+              style={{
+                width: "20%",
+                margin: "5%",
+              }}
             >
               <div>
                 {" "}
-                {index + 1} {movie.Title}
+                {index + 1} {movie.Title}{" "}
               </div>
-
-              <a href={`https://www.imdb.com/title/${movie.imdbID}`}>
-                <div>IMDB: {movie.imdbID}</div>
-                <div>Rating:{movie.imdbRating}</div>
+              <Link to={`/fetch-movie/${movie.imdbID}`}>
+                <div> IMDB: {movie.imdbID} </div>{" "}
+                <div> Rating: {movie.imdbRating} </div>{" "}
                 <img
                   src={movie.Poster}
                   alt={movie.Title}
-                  style={{ width: "100%" }}
-                />
-              </a>
+                  style={{
+                    width: "100%",
+                  }}
+                />{" "}
+              </Link>{" "}
             </div>
           );
         } else {
           return "";
         }
-      })}
+      })}{" "}
     </div>
   );
 }
